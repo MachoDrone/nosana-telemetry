@@ -5,9 +5,7 @@ services:
     # No restart policy — ephemeral container.
     # Use install.sh to start. Container self-removes on stop.
     user: "0:0"
-    entrypoint: ["/entrypoint.sh"]
     volumes:
-      - ./entrypoint.sh:/entrypoint.sh:ro
       - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
       - /var/lib/docker/volumes/podman-cache/_data/storage/overlay-containers:/var/log/containers:ro
       - /proc:/hostfs/proc:ro

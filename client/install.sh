@@ -134,10 +134,6 @@ echo "Downloading client files..."
 wget -qO "${INSTALL_DIR}/otel-collector.yaml" "${GITHUB_RAW}/otel-collector.yaml"
 info "Downloaded otel-collector.yaml"
 
-wget -qO "${INSTALL_DIR}/entrypoint.sh" "${GITHUB_RAW}/entrypoint.sh"
-chmod +x "${INSTALL_DIR}/entrypoint.sh"
-info "Downloaded entrypoint.sh"
-
 echo ""
 
 # ─── 7. Discover podman containers ────────────────────────────────────────────
@@ -186,8 +182,6 @@ fi
 docker run -d --rm \
     --name "${CONTAINER_NAME}" \
     --user 0:0 \
-    --entrypoint /entrypoint.sh \
-    -v "${INSTALL_DIR}/entrypoint.sh:/entrypoint.sh:ro" \
     -v "${INSTALL_DIR}/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro" \
     -v "${OVERLAY_CONTAINERS_DIR}:/var/log/containers:ro" \
     -v /proc:/hostfs/proc:ro \
