@@ -16,13 +16,15 @@ receivers:
           parse_from: attributes.time
           layout_type: gotime
           layout: '2006-01-02T15:04:05.999999999-07:00'
-        on_error: drop
+        on_error: send
       - type: move
         from: attributes.log
         to: body
+        on_error: send
       - type: move
         from: attributes.stream
         to: resource.stream
+        on_error: send
 
   hostmetrics:
     root_path: /hostfs
