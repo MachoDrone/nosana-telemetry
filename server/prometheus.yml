@@ -7,3 +7,12 @@ scrape_configs:
     static_configs:
       - targets:
           - "otel-collector:8889"
+
+  - job_name: "telemetry-services"
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - "prometheus:9090"
+          - "loki:3100"
+          - "grafana:3000"
+          - "otel-collector:8888"

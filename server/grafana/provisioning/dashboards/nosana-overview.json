@@ -20,15 +20,8 @@
   "links": [],
   "panels": [
     {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
-      "id": 100,
-      "title": "Fleet Status",
-      "type": "row"
-    },
-    {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Number of distinct hosts that have sent logs in the last 5 minutes",
+      "description": "Number of distinct hosts that have sent logs in the last 15 minutes",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -41,11 +34,12 @@
               { "color": "green", "value": 500 }
             ]
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 1 },
+      "gridPos": { "h": 2, "w": 8, "x": 0, "y": 2 },
       "id": 1,
       "options": {
         "colorMode": "background",
@@ -66,7 +60,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[5m])))",
+          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[15m])))",
           "instant": true,
           "refId": "A"
         }
@@ -74,7 +68,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Rate of log lines ingested per minute across all hosts",
+      "description": "Average log lines per minute over 15-minute window",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -88,11 +82,13 @@
               { "color": "red", "value": 200000 }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 1 },
+      "gridPos": { "h": 2, "w": 8, "x": 8, "y": 2 },
       "id": 2,
       "options": {
         "colorMode": "background",
@@ -113,7 +109,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"}[1m]))",
+          "expr": "sum(count_over_time({host_name=~\".+\"}[15m])) / 15",
           "instant": true,
           "refId": "A"
         }
@@ -121,7 +117,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Rate of error-level log entries per minute",
+      "description": "Average error log entries per minute over 15-minute window",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -135,11 +131,13 @@
               { "color": "red", "value": 500 }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 1 },
+      "gridPos": { "h": 2, "w": 8, "x": 16, "y": 2 },
       "id": 3,
       "options": {
         "colorMode": "background",
@@ -160,15 +158,88 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[1m]))",
+          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[15m])) / 15",
           "instant": true,
           "refId": "A"
         }
       ]
     },
     {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Resource usage by telemetry containers (otel, loki, prometheus, grafana)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "noValue": "—"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "CPU" },
+            "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 1 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "RAM" },
+            "properties": [{ "id": "unit", "value": "decgbytes" }, { "id": "decimals", "value": 1 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "NIC" },
+            "properties": [{ "id": "unit", "value": "Gbps" }, { "id": "decimals", "value": 2 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Drive" },
+            "properties": [{ "id": "unit", "value": "decgbytes" }, { "id": "decimals", "value": 2 }]
+          }
+        ]
+      },
+      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+      "id": 10,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
+          "legendFormat": "CPU",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1073741824",
+          "legendFormat": "RAM",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
+          "legendFormat": "NIC",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "prometheus_tsdb_storage_size_bytes / 1073741824",
+          "legendFormat": "Drive",
+          "instant": true,
+          "refId": "D"
+        }
+      ]
+    },
+    {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
       "id": 101,
       "title": "Logs",
       "type": "row"
@@ -180,7 +251,7 @@
         "defaults": {},
         "overrides": []
       },
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 5 },
       "id": 4,
       "options": {
         "dedupStrategy": "none",
@@ -204,7 +275,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
       "id": 102,
       "title": "Error Logs",
       "type": "row"
@@ -216,7 +287,7 @@
         "defaults": {},
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 21 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
       "id": 5,
       "options": {
         "dedupStrategy": "none",
@@ -240,7 +311,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 },
       "id": 103,
       "title": "Host Metrics",
       "type": "row"
@@ -287,7 +358,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 },
       "id": 6,
       "options": {
         "legend": {
@@ -351,7 +422,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
       "id": 7,
       "options": {
         "legend": {
@@ -375,7 +446,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 40 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
       "id": 104,
       "title": "Log Volume",
       "type": "row"
@@ -410,7 +481,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 41 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
       "id": 8,
       "options": {
         "barRadius": 0.1,
