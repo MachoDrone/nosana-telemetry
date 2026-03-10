@@ -14,7 +14,8 @@ receivers:
         regex: '^(?P<time>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+[+-]\d{2}:\d{2}) (?P<stream>stdout|stderr) [FP] (?P<log>.*)$'
         timestamp:
           parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%f%z'
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999999999-07:00'
         on_error: drop
       - type: move
         from: attributes.log
