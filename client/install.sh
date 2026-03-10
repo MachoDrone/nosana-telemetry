@@ -185,7 +185,7 @@ fi
 
 docker run -d --rm \
     --name "${CONTAINER_NAME}" \
-    --user root \
+    --user 0:0 \
     --entrypoint /entrypoint.sh \
     -v "${INSTALL_DIR}/entrypoint.sh:/entrypoint.sh:ro" \
     -v "${INSTALL_DIR}/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro" \

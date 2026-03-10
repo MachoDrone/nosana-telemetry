@@ -4,7 +4,7 @@ services:
     container_name: nosana-telemetry-client
     # No restart policy — ephemeral container.
     # Use install.sh to start. Container self-removes on stop.
-    user: root
+    user: "0:0"
     entrypoint: ["/entrypoint.sh"]
     volumes:
       - ./entrypoint.sh:/entrypoint.sh:ro
