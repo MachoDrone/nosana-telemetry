@@ -197,7 +197,7 @@
       "targets": [
         {
           "datasource": { "type": "loki" },
-          "expr": "{host_name=~\"$host\"} |= \"\" | line_format \"{{.body}}\"",
+          "expr": "{host_name=~\"$host\"}",
           "refId": "A"
         }
       ]
