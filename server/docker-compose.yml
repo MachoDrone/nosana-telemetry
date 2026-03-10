@@ -11,7 +11,7 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.120.0
     container_name: nosana-otel-gateway
-    restart: unless-stopped
+    # Ephemeral: no restart policy. Use install.sh to start.
     ports:
       - "4317:4317"
       - "4318:4318"
@@ -28,7 +28,7 @@ services:
   loki:
     image: grafana/loki:3.4.2
     container_name: nosana-loki
-    restart: unless-stopped
+    # Ephemeral: no restart policy. Use install.sh to start.
     ports:
       - "3100:3100"
     volumes:
@@ -41,7 +41,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.2.1
     container_name: nosana-prometheus
-    restart: unless-stopped
+    # Ephemeral: no restart policy. Use install.sh to start.
     ports:
       - "9090:9090"
     volumes:
@@ -57,7 +57,7 @@ services:
   grafana:
     image: grafana/grafana:11.5.2
     container_name: nosana-grafana
-    restart: unless-stopped
+    # Ephemeral: no restart policy. Use install.sh to start.
     ports:
       - "3000:3000"
     volumes:

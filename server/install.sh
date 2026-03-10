@@ -198,6 +198,13 @@ cat <<EOF
   Save these credentials! They are stored in:
   ${INSTALL_DIR}/.env
 
+  Server is ephemeral — containers do not auto-restart.
+  Data volumes persist across restarts.
+
+  To stop + clean:   cd ${INSTALL_DIR} && docker compose down
+  To wipe all data:  cd ${INSTALL_DIR} && docker compose down -v
+  To restart:        re-run this install script
+
   To set up a client host, run:
   bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) ${SERVER_IP} ${OTEL_API_KEY}
 ══════════════════════════════════════
