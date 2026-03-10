@@ -303,7 +303,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "system_cpu_utilization{host_name=~\"$host\"}",
+          "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state=\"idle\", host_name=~\"$host\"}[5m])))",
           "legendFormat": "{{host_name}}",
           "refId": "A"
         }
@@ -367,7 +367,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "system_memory_utilization{host_name=~\"$host\"}",
+          "expr": "100 * sum by (host_name) (system_memory_usage_bytes{state=\"used\", host_name=~\"$host\"}) / sum by (host_name) (system_memory_usage_bytes{host_name=~\"$host\"})",
           "legendFormat": "{{host_name}}",
           "refId": "A"
         }
