@@ -27,7 +27,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Number of distinct hosts that have sent logs in the last 5 minutes",
       "fieldConfig": {
         "defaults": {
@@ -65,7 +65,7 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[5m])))",
           "instant": true,
           "refId": "A"
@@ -73,7 +73,7 @@
       ]
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Rate of log lines ingested per minute across all hosts",
       "fieldConfig": {
         "defaults": {
@@ -112,7 +112,7 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "sum(count_over_time({host_name=~\".+\"}[1m]))",
           "instant": true,
           "refId": "A"
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Rate of error-level log entries per minute",
       "fieldConfig": {
         "defaults": {
@@ -159,7 +159,7 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[1m]))",
           "instant": true,
           "refId": "A"
@@ -174,7 +174,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Live log stream from selected hosts",
       "fieldConfig": {
         "defaults": {},
@@ -196,8 +196,8 @@
       "type": "logs",
       "targets": [
         {
-          "datasource": { "type": "loki" },
-          "expr": "{host_name=~\"$host\"} |= \"\" | line_format \"{{.body}}\"",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{host_name=~\"$host\"}",
           "refId": "A"
         }
       ]
@@ -210,7 +210,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Log entries matching error, fail, exception, or timeout patterns",
       "fieldConfig": {
         "defaults": {},
@@ -232,7 +232,7 @@
       "type": "logs",
       "targets": [
         {
-          "datasource": { "type": "loki" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout\"",
           "refId": "A"
         }
@@ -246,7 +246,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "description": "CPU utilization percentage by host",
       "fieldConfig": {
         "defaults": {
@@ -302,15 +302,15 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus" },
-          "expr": "system_cpu_utilization{host_name=~\"$host\"}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state=\"idle\", host_name=~\"$host\"}[5m])))",
           "legendFormat": "{{host_name}}",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": { "type": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "description": "Memory utilization percentage by host",
       "fieldConfig": {
         "defaults": {
@@ -366,8 +366,8 @@
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus" },
-          "expr": "system_memory_utilization{host_name=~\"$host\"}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "100 * sum by (host_name) (system_memory_usage_bytes{state=\"used\", host_name=~\"$host\"}) / sum by (host_name) (system_memory_usage_bytes{host_name=~\"$host\"})",
           "legendFormat": "{{host_name}}",
           "refId": "A"
         }
@@ -381,7 +381,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "loki" },
+      "datasource": { "type": "loki", "uid": "loki" },
       "description": "Log line volume over time, grouped by host",
       "fieldConfig": {
         "defaults": {
@@ -433,7 +433,7 @@
       "type": "barchart",
       "targets": [
         {
-          "datasource": { "type": "loki" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "sum by (host_name) (count_over_time({host_name=~\"$host\"}[1m]))",
           "legendFormat": "{{host_name}}",
           "refId": "A"
@@ -448,13 +448,13 @@
   "templating": {
     "list": [
       {
-        "allValue": ".*",
+        "allValue": ".+",
         "current": {
           "selected": true,
           "text": ["All"],
           "value": ["$__all"]
         },
-        "datasource": { "type": "loki" },
+        "datasource": { "type": "loki", "uid": "loki" },
         "definition": "label_values({}, host_name)",
         "description": "Filter by host name",
         "hide": 0,
@@ -475,13 +475,13 @@
         "type": "query"
       },
       {
-        "allValue": ".*",
+        "allValue": ".+",
         "current": {
           "selected": true,
           "text": ["All"],
           "value": ["$__all"]
         },
-        "datasource": { "type": "loki" },
+        "datasource": { "type": "loki", "uid": "loki" },
         "definition": "label_values({host_name=~\"$host\"}, container_id)",
         "description": "Filter by container ID",
         "hide": 0,
