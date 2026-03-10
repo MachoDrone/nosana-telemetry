@@ -2,7 +2,8 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.120.0
     container_name: nosana-telemetry-client
-    restart: unless-stopped
+    # No restart policy — ephemeral container.
+    # Use install.sh to start. Container self-removes on stop.
     user: root
     entrypoint: ["/entrypoint.sh"]
     volumes:

@@ -57,14 +57,6 @@ if ! docker info &>/dev/null; then
 fi
 info "Docker daemon is running."
 
-# Docker Compose v2 plugin
-if ! docker compose version &>/dev/null; then
-    err "Docker Compose v2 plugin is not available."
-    err "Install it with: sudo apt-get install docker-compose-plugin"
-    exit 1
-fi
-info "Docker Compose v2 plugin is available."
-
 # Podman container running
 if ! docker ps --format '{{.Names}}' | grep -q '^podman$'; then
     err "The 'podman' container is not running."
@@ -139,9 +131,6 @@ echo ""
 
 echo "Downloading client files..."
 
-wget -qO "${INSTALL_DIR}/docker-compose.yml" "${GITHUB_RAW}/docker-compose.yml"
-info "Downloaded docker-compose.yml"
-
 wget -qO "${INSTALL_DIR}/otel-collector.yaml" "${GITHUB_RAW}/otel-collector.yaml"
 info "Downloaded otel-collector.yaml"
 
@@ -182,26 +171,43 @@ chmod 600 "${INSTALL_DIR}/.env"
 info "Configuration written to ${INSTALL_DIR}/.env (permissions: 600)"
 echo ""
 
-# ─── 9. Start the collector ───────────────────────────────────────────────────
+# ─── 9. Start the collector (ephemeral: --rm auto-removes on stop) ───────────
 
 echo "Starting telemetry collector..."
 
 # Stop existing container if running (idempotent)
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     info "Stopping existing ${CONTAINER_NAME} container..."
-    docker compose -f "${INSTALL_DIR}/docker-compose.yml" down --remove-orphans 2>/dev/null || true
+    docker stop "${CONTAINER_NAME}" 2>/dev/null || true
+    docker rm "${CONTAINER_NAME}" 2>/dev/null || true
+    sleep 1
 fi
 
-docker compose -f "${INSTALL_DIR}/docker-compose.yml" up -d
+docker run -d --rm \
+    --name "${CONTAINER_NAME}" \
+    --user root \
+    --entrypoint /entrypoint.sh \
+    -v "${INSTALL_DIR}/entrypoint.sh:/entrypoint.sh:ro" \
+    -v "${INSTALL_DIR}/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro" \
+    -v "${OVERLAY_CONTAINERS_DIR}:/var/log/containers:ro" \
+    -v /proc:/hostfs/proc:ro \
+    -v /sys:/hostfs/sys:ro \
+    -v /etc/hostname:/etc/hostname:ro \
+    -e "OTEL_SERVER=${SERVER_ADDRESS}" \
+    -e "OTEL_API_KEY=${API_KEY}" \
+    -e "NODE_NAME=${NODE_NAME}" \
+    -e "HOST_PROC=/hostfs/proc" \
+    -e "HOST_SYS=/hostfs/sys" \
+    "otel/opentelemetry-collector-contrib:0.120.0"
 
 # Wait for container to start
-sleep 5
+sleep 3
 
 if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    info "Container '${CONTAINER_NAME}' is running."
+    info "Container '${CONTAINER_NAME}' is running (ephemeral: self-removes on stop)."
 else
     err "Container '${CONTAINER_NAME}' failed to start. Recent logs:"
-    docker compose -f "${INSTALL_DIR}/docker-compose.yml" logs --tail=20 >&2 || true
+    docker logs "${CONTAINER_NAME}" --tail=20 2>&1 >&2 || true
     exit 1
 fi
 
@@ -251,8 +257,11 @@ echo ""
 echo "  Logs will appear in Grafana at:"
 echo "  http://${SERVER_ADDRESS}:3000"
 echo ""
+echo "  Container is ephemeral — it self-removes when stopped."
+echo "  To re-run after reboot or stop, use the install command again."
+echo ""
 echo "  To check status:  docker logs ${CONTAINER_NAME}"
-echo "  To restart:       docker compose -f ${INSTALL_DIR}/docker-compose.yml restart"
-echo "  To update config: re-run this install script"
+echo "  To stop + remove: docker stop ${CONTAINER_NAME}"
+echo "  To update/start:  re-run this install script"
 echo "══════════════════════════════════════"
 echo ""
