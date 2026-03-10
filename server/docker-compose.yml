@@ -1,0 +1,70 @@
+networks:
+  nosana-telemetry:
+    name: nosana-telemetry
+
+volumes:
+  loki-data:
+  prometheus-data:
+  grafana-data:
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    container_name: nosana-otel-gateway
+    restart: unless-stopped
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    environment:
+      - OTEL_API_KEY=${OTEL_API_KEY}
+    depends_on:
+      - loki
+    networks:
+      - nosana-telemetry
+
+  loki:
+    image: grafana/loki:3.4.2
+    container_name: nosana-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - nosana-telemetry
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: nosana-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=48h
+      - --web.enable-lifecycle
+    networks:
+      - nosana-telemetry
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    container_name: nosana-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    networks:
+      - nosana-telemetry

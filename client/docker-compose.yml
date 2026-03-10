@@ -1,0 +1,20 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    container_name: nosana-telemetry-client
+    restart: unless-stopped
+    user: root
+    entrypoint: ["/entrypoint.sh"]
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh:ro
+      - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - /var/lib/docker/volumes/podman-cache/_data/storage/overlay-containers:/var/log/containers:ro
+      - /proc:/hostfs/proc:ro
+      - /sys:/hostfs/sys:ro
+      - /etc/hostname:/etc/hostname:ro
+    environment:
+      - OTEL_SERVER=${OTEL_SERVER}
+      - OTEL_API_KEY=${OTEL_API_KEY}
+      - NODE_NAME=${NODE_NAME}
+      - HOST_PROC=/hostfs/proc
+      - HOST_SYS=/hostfs/sys

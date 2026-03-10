@@ -1,0 +1,103 @@
+extensions:
+  bearertokenauth:
+    token: "${OTEL_API_KEY}"
+
+receivers:
+  filelog:
+    include:
+      - /var/log/containers/*/userdata/ctr.log
+    include_file_path: true
+    include_file_name: false
+    start_at: end
+    operators:
+      - type: regex_parser
+        regex: '^(?P<time>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+[+-]\d{2}:\d{2}) (?P<stream>stdout|stderr) [FP] (?P<log>.*)$'
+        timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%dT%H:%M:%S.%f%z'
+        on_error: drop
+      - type: move
+        from: attributes.log
+        to: body
+      - type: move
+        from: attributes.stream
+        to: resource.stream
+
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      network:
+      load:
+
+processors:
+  transform/clean_ansi:
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "\\x1b\\[[0-9;?]*[a-zA-Z]", "")
+          - replace_pattern(body, "\\x1b\\[\\?[0-9]*[a-zA-Z]", "")
+          - replace_pattern(body, "\\x0f", "")
+          - replace_pattern(body, "\\r", "")
+          - replace_pattern(body, "\\x1b\\][^\\x07]*\\x07", "")
+          - set(body, Trim(body, " "))
+
+  filter/drop_noise:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'IsMatch(body, "[\\x{280B}\\x{2819}\\x{2839}\\x{2838}\\x{283C}\\x{2834}\\x{2826}\\x{2827}\\x{2807}\\x{280F}]")'
+        - 'IsMatch(body, "RUNNING JOB.*Duration:")'
+        - 'IsMatch(body, "RESTARTING.*In.*seconds")'
+        - 'IsMatch(body, "Installing @nosana")'
+        - 'IsMatch(body, "Checking if provider is healthy")'
+        - 'IsMatch(body, "Starting node api")'
+        - 'body == ""'
+
+  resource/host_info:
+    attributes:
+      - key: host.name
+        value: "${NODE_NAME}"
+        action: upsert
+      - key: service.name
+        value: "nosana-node"
+        action: upsert
+
+  transform/container_id:
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["container.id"], ExtractPatterns(attributes["log.file.path"], ".*/(?P<id>[a-f0-9]{12})[a-f0-9]*/userdata/ctr\\.log")["id"]) where attributes["log.file.path"] != nil
+
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+
+exporters:
+  otlphttp:
+    endpoint: "http://${OTEL_SERVER}:4318"
+    auth:
+      authenticator: bearertokenauth
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      queue_size: 500
+
+service:
+  extensions: [bearertokenauth]
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [transform/clean_ansi, filter/drop_noise, resource/host_info, transform/container_id, batch]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resource/host_info, batch]
+      exporters: [otlphttp]
+  telemetry:
+    logs:
+      level: warn

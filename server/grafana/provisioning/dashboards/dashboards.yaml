@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: 'Nosana'
+    orgId: 1
+    folder: 'Nosana Telemetry'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false
