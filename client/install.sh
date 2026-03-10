@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.01.1
+# Version: 0.01.2
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
@@ -212,24 +212,12 @@ echo ""
 echo "Verifying connectivity to server..."
 
 CONNECTIVITY_STATUS="Unknown"
-if command -v curl &>/dev/null; then
-    if curl -sf -o /dev/null --connect-timeout 5 "http://${SERVER_ADDRESS}:4318"; then
-        CONNECTIVITY_STATUS="Connected"
-        info "Successfully reached server at ${SERVER_ADDRESS}:4318"
-    else
-        warn "Could not reach server at ${SERVER_ADDRESS}:4318"
-        CONNECTIVITY_STATUS="Unreachable"
-    fi
-elif command -v wget &>/dev/null; then
-    if wget -q --spider --timeout=5 "http://${SERVER_ADDRESS}:4318" 2>/dev/null; then
-        CONNECTIVITY_STATUS="Connected"
-        info "Successfully reached server at ${SERVER_ADDRESS}:4318"
-    else
-        warn "Could not reach server at ${SERVER_ADDRESS}:4318"
-        CONNECTIVITY_STATUS="Unreachable"
-    fi
+if (echo > /dev/tcp/"${SERVER_ADDRESS}"/4318) 2>/dev/null; then
+    CONNECTIVITY_STATUS="Connected"
+    info "Successfully reached server at ${SERVER_ADDRESS}:4318"
 else
-    warn "Neither curl nor wget available on host — skipping connectivity check."
+    warn "Could not reach server at ${SERVER_ADDRESS}:4318"
+    CONNECTIVITY_STATUS="Unreachable"
 fi
 
 echo ""
