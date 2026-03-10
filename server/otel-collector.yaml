@@ -15,12 +15,6 @@ receivers:
           authenticator: bearertokenauth
 
 processors:
-  transform/loki_labels:
-    log_statements:
-      - context: resource
-        statements:
-          - set(attributes["loki.resource.labels"], "host.name, service.name")
-
   batch:
     timeout: 5s
     send_batch_size: 2000
@@ -42,7 +36,7 @@ service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [transform/loki_labels, batch]
+      processors: [batch]
       exporters: [otlphttp/loki]
     metrics:
       receivers: [otlp]
