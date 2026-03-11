@@ -185,16 +185,17 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
-        "textMode": "value",
+        "textMode": "value_and_name",
         "wideLayout": true
       },
-      "title": "CPU",
+      "title": "",
       "transparent": true,
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
+          "legendFormat": "CPU",
           "instant": true,
           "refId": "A"
         }
@@ -221,16 +222,17 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
-        "textMode": "value",
+        "textMode": "value_and_name",
         "wideLayout": true
       },
-      "title": "RAM",
+      "title": "",
       "transparent": true,
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1048576",
+          "legendFormat": "RAM",
           "instant": true,
           "refId": "A"
         }
@@ -257,16 +259,17 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
-        "textMode": "value",
+        "textMode": "value_and_name",
         "wideLayout": true
       },
-      "title": "NIC",
+      "title": "",
       "transparent": true,
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
+          "legendFormat": "NIC",
           "instant": true,
           "refId": "A"
         }
@@ -293,16 +296,17 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
-        "textMode": "value",
+        "textMode": "value_and_name",
         "wideLayout": true
       },
-      "title": "Drive",
+      "title": "",
       "transparent": true,
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "prometheus_tsdb_storage_size_bytes / 1048576",
+          "legendFormat": "Drive",
           "instant": true,
           "refId": "A"
         }
