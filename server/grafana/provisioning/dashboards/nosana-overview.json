@@ -185,6 +185,7 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -222,6 +223,7 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -259,6 +261,7 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -296,6 +299,7 @@
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -305,7 +309,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "prometheus_tsdb_storage_size_bytes / 1048576",
+          "expr": "(prometheus_tsdb_size_bytes or prometheus_tsdb_storage_size_bytes) / 1048576",
           "legendFormat": "Drive",
           "instant": true,
           "refId": "A"
