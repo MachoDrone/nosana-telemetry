@@ -1,0 +1,64 @@
+version: 1
+
+defaults:
+  cooldown: 300
+  timeout: 10
+  max_output_lines: 50
+
+playbooks:
+  - id: connectivity
+    name: "DNS / Connectivity Failure"
+    pattern: "EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|fetch failed|ConnectTimeout"
+    severity: error
+    cooldown: 300
+    commands:
+      - "nslookup nosana.mypinata.cloud 2>&1 || echo NSLOOKUP_FAILED"
+      - "dig @8.8.8.8 nosana.mypinata.cloud +short 2>&1 || echo DIG_FAILED"
+      - "cat /etc/resolv.conf"
+      - "ping -c 3 -W 2 8.8.8.8 2>&1 || echo PING_FAILED"
+      - "curl -so /dev/null -w 'HTTP %{http_code} in %{time_total}s' --connect-timeout 5 https://node.k8s.prd.nos.ci 2>&1 || echo CURL_FAILED"
+
+  - id: gpu_health
+    name: "GPU Memory / CUDA Error"
+    pattern: "out of memory|CUDA|RuntimeError.*GPU"
+    severity: error
+    cooldown: 300
+    commands:
+      - "nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu --format=csv,noheader 2>&1 || echo NVIDIA_SMI_UNAVAILABLE"
+      - "nvidia-smi pmon -c 1 2>&1 || echo PMON_UNAVAILABLE"
+
+  - id: disk_space
+    name: "Disk Space Exhausted"
+    pattern: "ENOSPC|No space left on device"
+    severity: critical
+    cooldown: 900
+    commands:
+      - "df -h"
+      - "du -sh /var/lib/docker/volumes/* 2>/dev/null | sort -rh | head -10"
+
+  - id: container_health
+    name: "Container Failure"
+    pattern: "container.*not running|container.*exited|container.*dead"
+    severity: error
+    cooldown: 600
+    commands:
+      - "docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}' 2>&1 || echo DOCKER_UNAVAILABLE"
+      - "docker exec podman podman ps -a --format 'table {{.Names}}\t{{.Status}}' 2>&1 || echo PODMAN_UNAVAILABLE"
+
+  - id: job_failure
+    name: "Job Completion Failure"
+    pattern: "Failed to finish job|Error finishing|Resolving job.*failed"
+    severity: error
+    cooldown: 120
+    commands:
+      - "nslookup nosana.mypinata.cloud 2>&1 || echo DNS_FAILED"
+      - "docker exec podman podman ps --format '{{.Names}} {{.Status}}' 2>&1 || echo PODMAN_CHECK_FAILED"
+      - "curl -so /dev/null -w 'HTTP %{http_code}' --connect-timeout 5 https://nosana.mypinata.cloud 2>&1 || echo IPFS_GATEWAY_UNREACHABLE"
+
+  - id: solana_error
+    name: "Solana / Anchor Error"
+    pattern: "AnchorError|custom program error|AccountNotInitialized|429 Too Many Requests"
+    severity: warning
+    cooldown: 300
+    commands:
+      - "curl -so /dev/null -w 'HTTP %{http_code} in %{time_total}s' --connect-timeout 5 https://api.mainnet-beta.solana.com 2>&1 || echo RPC_UNREACHABLE"
