@@ -166,74 +166,145 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "description": "Resource usage by telemetry containers (otel, loki, prometheus, grafana)",
+      "description": "Telemetry services CPU usage",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "percent",
+          "decimals": 1,
           "noValue": "—"
         },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "CPU" },
-            "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 1 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "RAM" },
-            "properties": [{ "id": "unit", "value": "decgbytes" }, { "id": "decimals", "value": 1 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "NIC" },
-            "properties": [{ "id": "unit", "value": "Gbps" }, { "id": "decimals", "value": 2 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Drive" },
-            "properties": [{ "id": "unit", "value": "decgbytes" }, { "id": "decimals", "value": 2 }]
-          }
-        ]
+        "overrides": []
       },
-      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
       "id": 10,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": true
       },
-      "title": "",
+      "title": "CPU",
       "transparent": true,
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
-          "legendFormat": "CPU",
           "instant": true,
           "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Telemetry services memory usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "—"
         },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "id": 11,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "title": "RAM",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1073741824",
-          "legendFormat": "RAM",
+          "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1048576",
           "instant": true,
-          "refId": "B"
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Telemetry services network throughput",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "Gbps",
+          "decimals": 2,
+          "noValue": "—"
         },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "id": 12,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "title": "NIC",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
-          "legendFormat": "NIC",
           "instant": true,
-          "refId": "C"
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Prometheus TSDB storage size",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "—"
         },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "id": 13,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "title": "Drive",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "prometheus_tsdb_storage_size_bytes / 1073741824",
-          "legendFormat": "Drive",
+          "expr": "prometheus_tsdb_storage_size_bytes / 1048576",
           "instant": true,
-          "refId": "D"
+          "refId": "A"
         }
       ]
     },
