@@ -211,7 +211,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Log entries matching error, fail, exception, or timeout patterns",
+      "description": "Log entries matching LogLiefje error keywords (error, fail, warning, stopped, timeout, OOM, etc.)",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -233,7 +233,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout\"",
+          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|exit code.*137|partial success|\\\\[FAIL\\\\]\"",
           "refId": "A"
         }
       ]

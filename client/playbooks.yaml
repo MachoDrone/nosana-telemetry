@@ -15,8 +15,10 @@ playbooks:
       - "nslookup nosana.mypinata.cloud 2>&1 || echo NSLOOKUP_FAILED"
       - "dig @8.8.8.8 nosana.mypinata.cloud +short 2>&1 || echo DIG_FAILED"
       - "cat /etc/resolv.conf"
-      - "ping -c 3 -W 2 8.8.8.8 2>&1 || echo PING_FAILED"
-      - "curl -so /dev/null -w 'HTTP %{http_code} in %{time_total}s' --connect-timeout 5 https://node.k8s.prd.nos.ci 2>&1 || echo CURL_FAILED"
+      - "echo '--- IPv4 ---' && ping -4 -c 2 -W 2 8.8.8.8 2>&1 || echo IPV4_PING_FAILED"
+      - "echo '--- IPv6 ---' && ping -6 -c 2 -W 2 2001:4860:4860::8888 2>&1 || echo IPV6_PING_FAILED"
+      - "curl -4 -so /dev/null -w 'IPv4 HTTP %{http_code} in %{time_total}s' --connect-timeout 5 https://node.k8s.prd.nos.ci 2>&1 || echo CURL_IPV4_FAILED"
+      - "curl -6 -so /dev/null -w 'IPv6 HTTP %{http_code} in %{time_total}s' --connect-timeout 5 https://node.k8s.prd.nos.ci 2>&1 || echo CURL_IPV6_FAILED"
 
   - id: gpu_health
     name: "GPU Memory / CUDA Error"
