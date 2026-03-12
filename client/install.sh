@@ -113,7 +113,7 @@ echo "Detecting node name..."
 
 NODE_NAME=""
 NODE_NAME=$(docker exec podman podman exec nosana-node printenv 2>/dev/null \
-    | grep -oP 'NOSANA_NODE_NAME=\K.*' || true)
+    | sed -n 's/^NOSANA_NODE_NAME=//p' || true)
 
 if [[ -z "${NODE_NAME}" ]]; then
     NODE_NAME=$(hostname)

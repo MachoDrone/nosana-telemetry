@@ -402,8 +402,13 @@ spawn_updater() {
     docker run -d --rm \
         --name nosana-updater \
         --network host \
+        --pid host \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /opt/nosana-telemetry:/opt/nosana-telemetry \
+        -v /var/lib/docker:/var/lib/docker:ro \
+        -v /etc/hostname:/etc/hostname:ro \
+        -v /proc:/hostfs/proc:ro \
+        -v /sys:/hostfs/sys:ro \
         alpine:3.21 \
         sh -c "
             apk add --no-cache bash wget curl docker-cli >/dev/null 2>&1
