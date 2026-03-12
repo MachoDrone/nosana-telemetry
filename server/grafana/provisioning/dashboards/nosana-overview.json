@@ -596,7 +596,7 @@
     "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"],
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d"]
   },
-  "timezone": "browser",
+  "timezone": "utc",
   "title": "Nosana Fleet Overview",
   "uid": "nosana-fleet-overview",
   "version": 1,
