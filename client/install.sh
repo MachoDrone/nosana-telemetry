@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.02.0
+# Version: 0.02.1
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
@@ -105,14 +105,56 @@ echo ""
 echo "Detecting node name..."
 
 NODE_NAME=""
-NODE_NAME=$(docker exec podman podman exec nosana-node printenv 2>/dev/null \
-    | grep -oP 'NOSANA_NODE_NAME=\K.*' || true)
 
+# Helper: extract Solana public key (base58) from keypair JSON on stdin
+extract_pubkey() {
+    python3 -c "
+import json, sys
+key = json.load(sys.stdin)
+pubkey = bytes(key[32:])
+alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+n = int.from_bytes(pubkey, 'big')
+result = ''
+while n > 0:
+    n, r = divmod(n, 58)
+    result = alphabet[r] + result
+for b in pubkey:
+    if b == 0: result = '1' + result
+    else: break
+print(result)
+" 2>/dev/null
+}
+
+# Try 1: Host keypair file
+if [[ -f "${HOME}/.nosana/nosana_key.json" ]]; then
+    NODE_NAME=$(extract_pubkey < "${HOME}/.nosana/nosana_key.json" || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (wallet from host keypair): ${NODE_NAME}"
+    fi
+fi
+
+# Try 2: Keypair inside nosana-node container
+if [[ -z "${NODE_NAME}" ]]; then
+    NODE_NAME=$(docker exec podman podman exec nosana-node \
+        cat /root/.nosana/nosana_key.json 2>/dev/null | extract_pubkey || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (wallet from container keypair): ${NODE_NAME}"
+    fi
+fi
+
+# Try 3: NOSANA_NODE_NAME env var
+if [[ -z "${NODE_NAME}" ]]; then
+    NODE_NAME=$(docker exec podman podman exec nosana-node printenv 2>/dev/null \
+        | grep -oP 'NOSANA_NODE_NAME=\K.*' || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (from nosana-node env): ${NODE_NAME}"
+    fi
+fi
+
+# Try 4: Hostname fallback
 if [[ -z "${NODE_NAME}" ]]; then
     NODE_NAME=$(hostname)
     info "Node name (from hostname): ${NODE_NAME}"
-else
-    info "Node name (from nosana-node): ${NODE_NAME}"
 fi
 
 echo ""
