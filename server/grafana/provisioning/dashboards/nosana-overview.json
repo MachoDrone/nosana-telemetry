@@ -667,7 +667,8 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"}",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ]
     },
@@ -719,7 +720,8 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\" !~ \"(?i)gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(\" | label_format detected_level=`error`",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         },
         {
           "datasource": {
@@ -727,7 +729,8 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|partial success\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=|gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(|AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\"",
-          "refId": "B"
+          "refId": "B",
+          "queryType": "range"
         }
       ]
     },
@@ -1046,7 +1049,8 @@
           },
           "expr": "sum by (host_name) (count_over_time({host_name=~\"$host\"}[1m]))",
           "legendFormat": "{{host_name}}",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ]
     },
@@ -1098,7 +1102,8 @@
             "uid": "loki"
           },
           "expr": "{service_name=\"nosana-diagnostics\"} |~ \"RESULT|TRIGGERED\"",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ]
     },
@@ -1171,7 +1176,8 @@
           "expr": "sum by (playbook_id) (count_over_time({service_name=\"nosana-diagnostics\"} |~ \"TRIGGERED\" | regexp \"DIAG (?P<playbook_id>\\\\S+) TRIGGERED\" [1h]))",
           "legendFormat": "{{playbook_id}}",
           "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ]
     }
