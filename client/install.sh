@@ -5,7 +5,7 @@
 set -euo pipefail
 
 INSTALL_DIR="/opt/nosana-telemetry"
-GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client"
+GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/feat/auto-update/client"
 CONTAINER_NAME="nosana-telemetry-client"
 DIAG_CONTAINER_NAME="nosana-diagnostics"
 
