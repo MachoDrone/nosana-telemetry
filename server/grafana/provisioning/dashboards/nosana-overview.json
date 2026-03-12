@@ -233,7 +233,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|exit code.*137|partial success|\\\\[FAIL\\\\]\"",
+          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|exit code.*137|partial success|\\\\[FAIL\\\\]\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=\"",
           "refId": "A"
         }
       ]
