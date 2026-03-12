@@ -233,8 +233,13 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|exit code.*137|partial success|\\\\[FAIL\\\\]\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=\"",
+          "expr": "{host_name=~\"$host\"} |~ \"(?i)AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\" !~ \"(?i)gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(\" | label_format detected_level=`error`",
           "refId": "A"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|partial success\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=|gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(|AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\"",
+          "refId": "B"
         }
       ]
     },
