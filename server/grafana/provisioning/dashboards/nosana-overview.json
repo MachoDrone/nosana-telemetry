@@ -420,7 +420,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 8,
         "x": 0,
         "y": 3
@@ -439,10 +439,14 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Active Hosts",
+      "title": "",
       "type": "stat",
       "targets": [
         {
@@ -452,7 +456,8 @@
           },
           "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[5m])))",
           "refId": "A",
-          "queryType": "range"
+          "queryType": "range",
+          "legendFormat": "Hosts"
         }
       ]
     },
@@ -494,7 +499,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 8,
         "x": 8,
         "y": 3
@@ -502,7 +507,7 @@
       "id": 2,
       "options": {
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -513,10 +518,14 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Log Lines/min",
+      "title": "",
       "type": "stat",
       "targets": [
         {
@@ -526,7 +535,8 @@
           },
           "expr": "sum(count_over_time({host_name=~\".+\"}[1m]))",
           "refId": "A",
-          "queryType": "range"
+          "queryType": "range",
+          "legendFormat": "Lines/min"
         }
       ]
     },
@@ -568,7 +578,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 8,
         "x": 16,
         "y": 3
@@ -576,7 +586,7 @@
       "id": 3,
       "options": {
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -587,10 +597,14 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Errors/min",
+      "title": "",
       "type": "stat",
       "targets": [
         {
@@ -600,7 +614,8 @@
           },
           "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[1m]))",
           "refId": "A",
-          "queryType": "range"
+          "queryType": "range",
+          "legendFormat": "Errors/min"
         }
       ]
     },
@@ -610,7 +625,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 101,
       "title": "Logs",
@@ -630,7 +645,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "id": 4,
       "options": {
@@ -662,7 +677,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 102,
       "title": "Error Logs",
@@ -682,7 +697,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 19
       },
       "id": 5,
       "options": {
@@ -722,7 +737,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 29
       },
       "id": 103,
       "title": "Host Metrics",
@@ -799,7 +814,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 30
       },
       "id": 6,
       "options": {
@@ -902,7 +917,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 30
       },
       "id": 7,
       "options": {
@@ -940,7 +955,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 38
       },
       "id": 104,
       "title": "Log Volume",
@@ -996,7 +1011,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 39
       },
       "id": 8,
       "options": {
@@ -1041,7 +1056,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 44
       },
       "id": 105,
       "title": "Diagnostics",
@@ -1061,7 +1076,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 45
       },
       "id": 20,
       "options": {
@@ -1126,7 +1141,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 55
       },
       "id": 21,
       "options": {
