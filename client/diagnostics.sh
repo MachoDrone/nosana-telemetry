@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 0.02.4
+# Version: 0.02.5
 # Nosana Telemetry — Diagnostics Sidecar
 # Runs inside Alpine container; watches container logs and executes playbooks on pattern matches.
 set -uo pipefail
