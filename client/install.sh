@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.02.0
+# Version: 0.02.3
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
 INSTALL_DIR="/opt/nosana-telemetry"
-GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/feat/diagnostics-sidecar/client"
+GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/feat/auto-update/client"
 CONTAINER_NAME="nosana-telemetry-client"
 DIAG_CONTAINER_NAME="nosana-diagnostics"
+
+# Use sudo only when not already root (e.g. inside updater container)
+if [[ "$(id -u)" -eq 0 ]]; then
+    SUDO=""
+else
+    SUDO="sudo"
+fi
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -88,7 +95,7 @@ OVERLAY_CONTAINERS_DIR="${VOLUME_MOUNTPOINT}/storage/overlay-containers"
 # Check overlay-containers directory (may need sudo)
 if [[ -d "${OVERLAY_CONTAINERS_DIR}" ]]; then
     info "Podman container log directory found: ${OVERLAY_CONTAINERS_DIR}"
-elif sudo test -d "${OVERLAY_CONTAINERS_DIR}" 2>/dev/null; then
+elif $SUDO test -d "${OVERLAY_CONTAINERS_DIR}" 2>/dev/null; then
     info "Podman container log directory found (via sudo): ${OVERLAY_CONTAINERS_DIR}"
 else
     err "Podman container log directory not found at:"
@@ -121,9 +128,9 @@ echo ""
 
 echo "Setting up installation directory..."
 
-sudo mkdir -p "${INSTALL_DIR}"
+$SUDO mkdir -p "${INSTALL_DIR}"
 # Give current user ownership so docker compose can be run without sudo later
-sudo chown "$(id -u):$(id -g)" "${INSTALL_DIR}"
+$SUDO chown "$(id -u):$(id -g)" "${INSTALL_DIR}"
 
 info "Directory: ${INSTALL_DIR}"
 echo ""
@@ -143,6 +150,9 @@ info "Downloaded Dockerfile.diagnostics"
 
 wget -qO "${INSTALL_DIR}/playbooks.yaml" "${GITHUB_RAW}/playbooks.yaml"
 info "Downloaded playbooks.yaml"
+
+wget -qO "${INSTALL_DIR}/VERSION" "${GITHUB_RAW}/VERSION"
+info "Downloaded VERSION"
 
 echo ""
 
@@ -257,6 +267,7 @@ docker run -d --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -e "NODE_NAME=${NODE_NAME}" \
     -e "OTEL_SERVER=${SERVER_ADDRESS}" \
+    -e "OTEL_API_KEY=${API_KEY}" \
     -e "GITHUB_RAW=${GITHUB_RAW}" \
     ${NVIDIA_MOUNTS} \
     nosana-diagnostics:latest
