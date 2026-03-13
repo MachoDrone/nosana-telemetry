@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.02.9
+# Version: 0.03.0
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
@@ -299,7 +299,7 @@ if command -v nvidia-smi &>/dev/null; then
     info "nvidia-smi detected — GPU diagnostics enabled."
 fi
 
-docker run -d --rm \
+docker run -d --restart unless-stopped \
     --name "${DIAG_CONTAINER_NAME}" \
     --user 0:0 \
     --network host \
@@ -317,7 +317,7 @@ docker run -d --rm \
 sleep 2
 
 if docker ps --format '{{.Names}}' | grep -q "^${DIAG_CONTAINER_NAME}$"; then
-    info "Container '${DIAG_CONTAINER_NAME}' is running."
+    info "Container '${DIAG_CONTAINER_NAME}' is running (restart policy: unless-stopped)."
 else
     warn "Diagnostics sidecar failed to start (non-fatal). Check: docker logs ${DIAG_CONTAINER_NAME}"
 fi
