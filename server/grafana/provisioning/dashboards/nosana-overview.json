@@ -229,7 +229,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Number of distinct hosts that have sent logs in the last 5 minutes",
+      "description": "Number of distinct hosts that have sent logs in the last 15 minutes",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -242,7 +242,8 @@
               { "color": "green", "value": 500 }
             ]
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "0"
         },
         "overrides": []
       },
@@ -267,7 +268,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[5m])))",
+          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[15m])))",
           "instant": true,
           "refId": "A"
         }
@@ -275,7 +276,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Rate of log lines ingested per minute across all hosts",
+      "description": "Average log lines per minute over 15-minute window",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -289,7 +290,9 @@
               { "color": "red", "value": 200000 }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
         },
         "overrides": []
       },
@@ -314,7 +317,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"}[1m]))",
+          "expr": "sum(count_over_time({host_name=~\".+\"}[15m])) / 15",
           "instant": true,
           "refId": "A"
         }
@@ -322,7 +325,7 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Rate of error-level log entries per minute",
+      "description": "Average error log entries per minute over 15-minute window",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -336,7 +339,9 @@
               { "color": "red", "value": 500 }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
         },
         "overrides": []
       },
@@ -361,7 +366,159 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[1m]))",
+          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[15m])) / 15",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Telemetry services CPU usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
+      "id": 10,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
+          "legendFormat": "CPU",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Telemetry services memory usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "id": 11,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1048576",
+          "legendFormat": "RAM",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Telemetry services network throughput",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "Gbps",
+          "decimals": 2,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "id": 12,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
+          "legendFormat": "NIC",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Prometheus TSDB storage size",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "id": 13,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "text": { "titleSize": 10, "valueSize": 14 },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "(prometheus_tsdb_storage_blocks_bytes + prometheus_tsdb_head_chunks_storage_size_bytes + prometheus_tsdb_wal_storage_size_bytes) / 1048576",
+          "legendFormat": "Drive",
           "instant": true,
           "refId": "A"
         }
