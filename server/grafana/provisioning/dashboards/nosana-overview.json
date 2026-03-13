@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -12,7 +15,7 @@
       }
     ]
   },
-  "description": "Overview dashboard for the Nosana GPU fleet — logs, errors, and host metrics",
+  "description": "Overview dashboard for the Nosana GPU fleet \u2014 logs, errors, and host metrics",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -20,18 +23,32 @@
   "links": [],
   "panels": [
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Average CPU utilization across selected hosts",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 70 },
-              { "color": "red", "value": 90 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
             ]
           },
           "unit": "percent",
@@ -40,24 +57,41 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 5, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 5,
+        "x": 0,
+        "y": 0
+      },
       "id": 30,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
         "textMode": "value_and_name",
         "wideLayout": true,
-        "text": { "titleSize": 10, "valueSize": 14 }
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
       "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "avg(100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state=\"idle\", host_name=~\"$host\"}[15m]))))",
           "legendFormat": "CPU",
           "instant": true,
@@ -66,37 +100,67 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Average memory usage across selected hosts",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
           "unit": "decbytes",
           "decimals": 0,
           "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 5, "x": 5, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
       "id": 31,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
         "textMode": "value_and_name",
         "wideLayout": true,
-        "text": { "titleSize": 10, "valueSize": 14 }
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
       "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "avg(sum by (host_name) (system_memory_usage_bytes{state=\"used\", host_name=~\"$host\"}))",
           "legendFormat": "RAM",
           "instant": true,
@@ -105,37 +169,67 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Network throughput across selected hosts",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
           "unit": "bps",
           "decimals": 2,
           "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 5, "x": 10, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 5,
+        "x": 10,
+        "y": 0
+      },
       "id": 32,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
         "textMode": "value_and_name",
         "wideLayout": true,
-        "text": { "titleSize": 10, "valueSize": 14 }
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
       "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "8 * sum(rate(system_network_io_bytes_total{host_name=~\"$host\"}[15m]))",
           "legendFormat": "NIC",
           "instant": true,
@@ -144,37 +238,67 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Disk I/O throughput across selected hosts",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
           "unit": "Bps",
           "decimals": 0,
           "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 5, "x": 15, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 5,
+        "x": 15,
+        "y": 0
+      },
       "id": 33,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
         "textMode": "value_and_name",
         "wideLayout": true,
-        "text": { "titleSize": 10, "valueSize": 14 }
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
       "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum(rate(system_disk_io_bytes_total{host_name=~\"$host\"}[15m]))",
           "legendFormat": "Drive",
           "instant": true,
@@ -183,37 +307,67 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Active Grafana users",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
           "unit": "none",
           "decimals": 0,
           "noValue": "0"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 4, "x": 20, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
       "id": 34,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
         "textMode": "value_and_name",
         "wideLayout": true,
-        "text": { "titleSize": 10, "valueSize": 14 }
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
       "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "grafana_stat_active_users",
           "legendFormat": "Logged In",
           "refId": "A"
@@ -222,32 +376,55 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
       "id": 100,
       "title": "Fleet Status",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Number of distinct hosts that have sent logs in the last 15 minutes",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Number of distinct hosts that have sent logs in the last 5 minutes",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "orange", "value": 100 },
-              { "color": "green", "value": 500 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 100
+              },
+              {
+                "color": "green",
+                "value": 500
+              }
             ]
           },
-          "unit": "none",
-          "noValue": "0"
+          "unit": "none"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 3 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 3
+      },
       "id": 1,
       "options": {
         "colorMode": "background",
@@ -255,145 +432,235 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Active Hosts",
+      "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[15m])))",
-          "instant": true,
-          "refId": "A"
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "count(count by (host_name) (count_over_time({host_name=~\".+\"}[5m])))",
+          "refId": "A",
+          "queryType": "range",
+          "legendFormat": "Hosts"
         }
       ]
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Average log lines per minute over 15-minute window",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Rate of log lines ingested per minute across all hosts",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "blue", "value": null },
-              { "color": "green", "value": 1000 },
-              { "color": "yellow", "value": 50000 },
-              { "color": "red", "value": 200000 }
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1000
+              },
+              {
+                "color": "yellow",
+                "value": 50000
+              },
+              {
+                "color": "red",
+                "value": 200000
+              }
             ]
           },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0"
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 3 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 3
+      },
       "id": 2,
       "options": {
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Log Lines/min",
+      "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"}[15m])) / 15",
-          "instant": true,
-          "refId": "A"
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({host_name=~\".+\"}[1m]))",
+          "refId": "A",
+          "queryType": "range",
+          "legendFormat": "Lines/min"
         }
       ]
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
-      "description": "Average error log entries per minute over 15-minute window",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Rate of error-level log entries per minute",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "orange", "value": 100 },
-              { "color": "red", "value": 500 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "orange",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
             ]
           },
-          "unit": "short",
-          "decimals": 0,
-          "noValue": "0"
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 3 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
       "id": 3,
       "options": {
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        }
       },
-      "title": "Errors/min",
+      "title": "",
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[15m])) / 15",
-          "instant": true,
-          "refId": "A"
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({host_name=~\".+\"} |~ \"(?i)error\"[1m]))",
+          "refId": "A",
+          "queryType": "range",
+          "legendFormat": "Errors/min"
         }
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Telemetry services CPU usage",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "text" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
           "unit": "percent",
           "decimals": 1,
           "noValue": "\u2014"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
       "id": 10,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
-        "text": { "titleSize": 10, "valueSize": 14 },
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -402,7 +669,10 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
           "legendFormat": "CPU",
           "instant": true,
@@ -411,27 +681,47 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Telemetry services memory usage",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "text" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
           "unit": "decmbytes",
           "decimals": 0,
           "noValue": "\u2014"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
       "id": 11,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
-        "text": { "titleSize": 10, "valueSize": 14 },
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -440,7 +730,10 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1048576",
           "legendFormat": "RAM",
           "instant": true,
@@ -449,27 +742,47 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Telemetry services network throughput",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "text" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
           "unit": "Gbps",
           "decimals": 2,
           "noValue": "\u2014"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
       "id": 12,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
-        "text": { "titleSize": 10, "valueSize": 14 },
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -478,7 +791,10 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
           "legendFormat": "NIC",
           "instant": true,
@@ -487,27 +803,47 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Prometheus TSDB storage size",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "text" },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
           "unit": "decmbytes",
           "decimals": 0,
           "noValue": "\u2014"
         },
         "overrides": []
       },
-      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
       "id": 13,
       "options": {
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showPercentChange": false,
-        "text": { "titleSize": 10, "valueSize": 14 },
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
         "textMode": "value_and_name",
         "wideLayout": true
       },
@@ -516,7 +852,10 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "(prometheus_tsdb_storage_blocks_bytes + prometheus_tsdb_head_chunks_storage_size_bytes + prometheus_tsdb_wal_storage_size_bytes) / 1048576",
           "legendFormat": "Drive",
           "instant": true,
@@ -526,19 +865,32 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
       "id": 101,
       "title": "Logs",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Live log stream from selected hosts",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 10 },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
       "id": 4,
       "options": {
         "dedupStrategy": "none",
@@ -554,7 +906,10 @@
       "type": "logs",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "{host_name=~\"$host\"}",
           "refId": "A"
         }
@@ -562,19 +917,32 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
       "id": 102,
       "title": "Error Logs",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log entries matching LogLiefje error keywords (error, fail, warning, stopped, timeout, OOM, etc.)",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 23 },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
       "id": 5,
       "options": {
         "dedupStrategy": "none",
@@ -590,12 +958,18 @@
       "type": "logs",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\" !~ \"(?i)gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(\" | label_format detected_level=`error`",
           "refId": "A"
         },
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|partial success\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=|gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(|AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\"",
           "refId": "B"
         }
@@ -603,17 +977,27 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
       "id": 103,
       "title": "Host Metrics",
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "CPU utilization percentage by host",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -624,16 +1008,27 @@
             "drawStyle": "line",
             "fillOpacity": 15,
             "gradientMode": "opacity",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": true,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "max": 100,
@@ -641,31 +1036,54 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 70 },
-              { "color": "red", "value": 90 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
       "id": 6,
       "options": {
         "legend": {
-          "calcs": ["mean", "max"],
+          "calcs": [
+            "mean",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "title": "CPU Usage %",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "100 * (1 - avg by (host_name) (rate(system_cpu_time_seconds_total{state=\"idle\", host_name=~\"$host\"}[5m])))",
           "legendFormat": "{{host_name}}",
           "refId": "A"
@@ -673,11 +1091,16 @@
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Memory utilization percentage by host",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -688,16 +1111,27 @@
             "drawStyle": "line",
             "fillOpacity": 15,
             "gradientMode": "opacity",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": true,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "max": 100,
@@ -705,31 +1139,54 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 70 },
-              { "color": "red", "value": 90 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
       "id": 7,
       "options": {
         "legend": {
-          "calcs": ["mean", "max"],
+          "calcs": [
+            "mean",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "title": "Memory Usage %",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "100 * sum by (host_name) (system_memory_usage_bytes{state=\"used\", host_name=~\"$host\"}) / sum by (host_name) (system_memory_usage_bytes{host_name=~\"$host\"})",
           "legendFormat": "{{host_name}}",
           "refId": "A"
@@ -738,17 +1195,27 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
       "id": 104,
       "title": "Log Volume",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log line volume over time, grouped by host",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -757,23 +1224,39 @@
             "axisPlacement": "auto",
             "fillOpacity": 80,
             "gradientMode": "none",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineWidth": 1,
-            "scaleDistribution": { "type": "linear" },
-            "thresholdsStyle": { "mode": "off" }
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null }
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 43 },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
       "id": 8,
       "options": {
         "barRadius": 0.1,
@@ -781,7 +1264,9 @@
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": ["sum"],
+          "calcs": [
+            "sum"
+          ],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true
@@ -789,14 +1274,20 @@
         "orientation": "auto",
         "showValue": "never",
         "stacking": "normal",
-        "tooltip": { "mode": "multi", "sort": "desc" },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
         "xTickLabelRotation": 0
       },
       "title": "Log Volume by Host",
       "type": "barchart",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "sum by (host_name) (count_over_time({host_name=~\"$host\"}[1m]))",
           "legendFormat": "{{host_name}}",
           "refId": "A"
@@ -805,19 +1296,32 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 46 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
       "id": 105,
       "title": "Diagnostics",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Diagnostic command results from the sidecar across all hosts",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 47 },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
       "id": 20,
       "options": {
         "dedupStrategy": "none",
@@ -833,25 +1337,42 @@
       "type": "logs",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "{service_name=\"nosana-diagnostics\"} |~ \"RESULT|TRIGGERED\"",
           "refId": "A"
         }
       ]
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Count of diagnostic triggers per playbook in the last hour",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 50 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
             ]
           },
           "unit": "short",
@@ -860,7 +1381,12 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 57 },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
       "id": 21,
       "options": {
         "colorMode": "background",
@@ -868,7 +1394,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -880,10 +1408,116 @@
       "type": "stat",
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "sum by (playbook_id) (count_over_time({service_name=\"nosana-diagnostics\"} |~ \"TRIGGERED\" | regexp \"DIAG (?P<playbook_id>\\\\S+) TRIGGERED\" [1h]))",
           "legendFormat": "{{playbook_id}}",
           "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Active clients and when they last reported. Based on metrics timestamps (pushed alongside logs).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "No hosts reporting"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "host_name"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Host"
+              },
+              {
+                "id": "custom.width",
+                "value": 420
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Last Seen (UTC)"
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsSystem"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 40,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Last Seen (UTC)"
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "title": "Connected Hosts",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sort_desc(max by (host_name) (timestamp(system_cpu_load_average_1m{host_name=~\"$host\"})) * 1000)",
+          "instant": true,
+          "format": "table",
           "refId": "A"
         }
       ]
@@ -892,17 +1526,29 @@
   "preload": false,
   "refresh": "30s",
   "schemaVersion": 39,
-  "tags": ["nosana", "fleet", "gpu", "telemetry"],
+  "tags": [
+    "nosana",
+    "fleet",
+    "gpu",
+    "telemetry"
+  ],
   "templating": {
     "list": [
       {
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": { "type": "loki", "uid": "loki" },
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
         "definition": "label_values({}, host_name)",
         "description": "Filter by host name",
         "hide": 0,
@@ -926,10 +1572,17 @@
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": { "type": "loki", "uid": "loki" },
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
         "definition": "label_values({host_name=~\"$host\"}, container_id)",
         "description": "Filter by container ID",
         "hide": 0,
@@ -952,12 +1605,27 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"],
-    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d"]
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d"
+    ]
   },
   "timezone": "utc",
   "title": "Nosana Fleet Overview",
