@@ -36,6 +36,24 @@ receivers:
       network:
       load:
 
+  filelog/diagnostics:
+    include:
+      - /var/log/diagnostics/diag.log
+    include_file_path: false
+    start_at: end
+    operators:
+      - type: regex_parser
+        regex: '^(?P<time>\S+) DIAG (?P<playbook_id>\S+) (?P<diag_type>\S+) (?P<log>.*)$'
+        timestamp:
+          parse_from: attributes.time
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05Z'
+        on_error: send
+      - type: move
+        from: attributes.log
+        to: body
+        on_error: send
+
 processors:
   transform/clean_ansi:
     log_statements:
@@ -69,6 +87,15 @@ processors:
         value: "nosana-node"
         action: upsert
 
+  resource/host_info_diag:
+    attributes:
+      - key: host.name
+        value: "${NODE_NAME}"
+        action: upsert
+      - key: service.name
+        value: "nosana-diagnostics"
+        action: upsert
+
   transform/container_id:
     log_statements:
       - context: resource
@@ -100,6 +127,10 @@ service:
     metrics:
       receivers: [hostmetrics]
       processors: [resource/host_info, batch]
+      exporters: [otlphttp]
+    logs/diagnostics:
+      receivers: [filelog/diagnostics]
+      processors: [resource/host_info_diag, batch]
       exporters: [otlphttp]
   telemetry:
     logs:

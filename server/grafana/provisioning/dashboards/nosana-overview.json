@@ -620,12 +620,256 @@
       ]
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Telemetry services CPU usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(process_cpu_seconds_total{job=\"telemetry-services\"}[5m])) * 100",
+          "legendFormat": "CPU",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Telemetry services memory usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(process_resident_memory_bytes{job=\"telemetry-services\"}) / 1048576",
+          "legendFormat": "RAM",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Telemetry services network throughput",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "unit": "Gbps",
+          "decimals": 2,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(process_network_receive_bytes_total{job=\"telemetry-services\"}[5m]) + rate(process_network_transmit_bytes_total{job=\"telemetry-services\"}[5m])) * 8 / 1000000000 or vector(0)",
+          "legendFormat": "NIC",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Prometheus TSDB storage size",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "unit": "decmbytes",
+          "decimals": 0,
+          "noValue": "\u2014"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 10,
+          "valueSize": 14
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "title": "",
+      "transparent": true,
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(prometheus_tsdb_storage_blocks_bytes + prometheus_tsdb_head_chunks_storage_size_bytes + prometheus_tsdb_wal_storage_size_bytes) / 1048576",
+          "legendFormat": "Drive",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 9
       },
       "id": 101,
       "title": "Logs",
@@ -667,8 +911,7 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"}",
-          "refId": "A",
-          "queryType": "range"
+          "refId": "A"
         }
       ]
     },
@@ -720,8 +963,7 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\" !~ \"(?i)gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(\" | label_format detected_level=`error`",
-          "refId": "A",
-          "queryType": "range"
+          "refId": "A"
         },
         {
           "datasource": {
@@ -729,8 +971,7 @@
             "uid": "loki"
           },
           "expr": "{host_name=~\"$host\"} |~ \"(?i)error|fail|exception|timeout|warning|stopped|not supported|partial success\" !~ \"(?i)timeout\\\\s*=|fail\\\\w*\\\\s*=|gemm_config\\\\.in is not found|warnings\\\\.warn\\\\(|AnchorError|ConnectTimeout|fetch failed|heartbeat timeout|exit code.*137|OOM|\\\\[FAIL\\\\]\"",
-          "refId": "B",
-          "queryType": "range"
+          "refId": "B"
         }
       ]
     },
@@ -1049,8 +1290,7 @@
           },
           "expr": "sum by (host_name) (count_over_time({host_name=~\"$host\"}[1m]))",
           "legendFormat": "{{host_name}}",
-          "refId": "A",
-          "queryType": "range"
+          "refId": "A"
         }
       ]
     },
@@ -1060,7 +1300,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 46
       },
       "id": 105,
       "title": "Diagnostics",
@@ -1080,7 +1320,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 47
       },
       "id": 20,
       "options": {
@@ -1102,8 +1342,7 @@
             "uid": "loki"
           },
           "expr": "{service_name=\"nosana-diagnostics\"} |~ \"RESULT|TRIGGERED\"",
-          "refId": "A",
-          "queryType": "range"
+          "refId": "A"
         }
       ]
     },
@@ -1146,7 +1385,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 57
       },
       "id": 21,
       "options": {
@@ -1176,8 +1415,7 @@
           "expr": "sum by (playbook_id) (count_over_time({service_name=\"nosana-diagnostics\"} |~ \"TRIGGERED\" | regexp \"DIAG (?P<playbook_id>\\\\S+) TRIGGERED\" [1h]))",
           "legendFormat": "{{playbook_id}}",
           "instant": true,
-          "refId": "A",
-          "queryType": "range"
+          "refId": "A"
         }
       ]
     },
@@ -1254,7 +1492,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 40,
       "options": {
