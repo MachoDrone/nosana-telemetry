@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.01.5
+# Version: 0.02.1
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
 INSTALL_DIR="/opt/nosana-telemetry"
-GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client"
+GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/feat/diagnostics-sidecar/client"
 CONTAINER_NAME="nosana-telemetry-client"
+DIAG_CONTAINER_NAME="nosana-diagnostics"
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -104,14 +105,56 @@ echo ""
 echo "Detecting node name..."
 
 NODE_NAME=""
-NODE_NAME=$(docker exec podman podman exec nosana-node printenv 2>/dev/null \
-    | grep -oP 'NOSANA_NODE_NAME=\K.*' || true)
 
+# Helper: extract Solana public key (base58) from keypair JSON on stdin
+extract_pubkey() {
+    python3 -c "
+import json, sys
+key = json.load(sys.stdin)
+pubkey = bytes(key[32:])
+alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+n = int.from_bytes(pubkey, 'big')
+result = ''
+while n > 0:
+    n, r = divmod(n, 58)
+    result = alphabet[r] + result
+for b in pubkey:
+    if b == 0: result = '1' + result
+    else: break
+print(result)
+" 2>/dev/null
+}
+
+# Try 1: Host keypair file
+if [[ -f "${HOME}/.nosana/nosana_key.json" ]]; then
+    NODE_NAME=$(extract_pubkey < "${HOME}/.nosana/nosana_key.json" || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (wallet from host keypair): ${NODE_NAME}"
+    fi
+fi
+
+# Try 2: Keypair inside nosana-node container
+if [[ -z "${NODE_NAME}" ]]; then
+    NODE_NAME=$(docker exec podman podman exec nosana-node \
+        cat /root/.nosana/nosana_key.json 2>/dev/null | extract_pubkey || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (wallet from container keypair): ${NODE_NAME}"
+    fi
+fi
+
+# Try 3: NOSANA_NODE_NAME env var
+if [[ -z "${NODE_NAME}" ]]; then
+    NODE_NAME=$(docker exec podman podman exec nosana-node printenv 2>/dev/null \
+        | grep -oP 'NOSANA_NODE_NAME=\K.*' || true)
+    if [[ -n "${NODE_NAME}" ]]; then
+        info "Node name (from nosana-node env): ${NODE_NAME}"
+    fi
+fi
+
+# Try 4: Hostname fallback
 if [[ -z "${NODE_NAME}" ]]; then
     NODE_NAME=$(hostname)
     info "Node name (from hostname): ${NODE_NAME}"
-else
-    info "Node name (from nosana-node): ${NODE_NAME}"
 fi
 
 echo ""
@@ -133,6 +176,15 @@ echo "Downloading client files..."
 
 wget -qO "${INSTALL_DIR}/otel-collector.yaml" "${GITHUB_RAW}/otel-collector.yaml"
 info "Downloaded otel-collector.yaml"
+
+wget -qO "${INSTALL_DIR}/diagnostics.sh" "${GITHUB_RAW}/diagnostics.sh"
+info "Downloaded diagnostics.sh"
+
+wget -qO "${INSTALL_DIR}/Dockerfile.diagnostics" "${GITHUB_RAW}/Dockerfile.diagnostics"
+info "Downloaded Dockerfile.diagnostics"
+
+wget -qO "${INSTALL_DIR}/playbooks.yaml" "${GITHUB_RAW}/playbooks.yaml"
+info "Downloaded playbooks.yaml"
 
 echo ""
 
@@ -171,6 +223,10 @@ echo ""
 
 echo "Starting telemetry collector..."
 
+# Create shared volume for diagnostics logs
+docker volume create nosana-diag-logs 2>/dev/null || true
+info "Diagnostics log volume ready."
+
 # Stop existing container if running (idempotent)
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     info "Stopping existing ${CONTAINER_NAME} container..."
@@ -187,6 +243,7 @@ docker run -d --rm \
     -v /proc:/hostfs/proc:ro \
     -v /sys:/hostfs/sys:ro \
     -v /etc/hostname:/etc/hostname:ro \
+    -v nosana-diag-logs:/var/log/diagnostics:ro \
     -e "OTEL_SERVER=${SERVER_ADDRESS}" \
     -e "OTEL_API_KEY=${API_KEY}" \
     -e "NODE_NAME=${NODE_NAME}" \
@@ -203,6 +260,55 @@ else
     err "Container '${CONTAINER_NAME}' failed to start. Recent logs:"
     docker logs "${CONTAINER_NAME}" --tail=20 2>&1 >&2 || true
     exit 1
+fi
+
+echo ""
+
+# ─── 9b. Build and start diagnostics sidecar ─────────────────────────────────
+
+echo "Setting up diagnostics sidecar..."
+
+# Build diagnostics image
+cd "${INSTALL_DIR}"
+docker build -q -t nosana-diagnostics:latest -f Dockerfile.diagnostics . >/dev/null 2>&1
+info "Built nosana-diagnostics image."
+
+# Stop existing diagnostics container if running
+if docker ps -a --format '{{.Names}}' | grep -q "^${DIAG_CONTAINER_NAME}$"; then
+    info "Stopping existing ${DIAG_CONTAINER_NAME} container..."
+    docker stop "${DIAG_CONTAINER_NAME}" 2>/dev/null || true
+    docker rm "${DIAG_CONTAINER_NAME}" 2>/dev/null || true
+    sleep 1
+fi
+
+# Detect nvidia-smi on host for GPU diagnostics
+NVIDIA_MOUNTS=""
+if command -v nvidia-smi &>/dev/null; then
+    NVIDIA_SMI_PATH=$(command -v nvidia-smi)
+    NVIDIA_MOUNTS="-v ${NVIDIA_SMI_PATH}:${NVIDIA_SMI_PATH}:ro --gpus all"
+    info "nvidia-smi detected — GPU diagnostics enabled."
+fi
+
+docker run -d --rm \
+    --name "${DIAG_CONTAINER_NAME}" \
+    --user 0:0 \
+    --network host \
+    -v "${OVERLAY_CONTAINERS_DIR}:/var/log/containers:ro" \
+    -v nosana-diag-logs:/var/log/diagnostics \
+    -v /etc/resolv.conf:/etc/resolv.conf:ro \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    -e "NODE_NAME=${NODE_NAME}" \
+    -e "OTEL_SERVER=${SERVER_ADDRESS}" \
+    -e "GITHUB_RAW=${GITHUB_RAW}" \
+    ${NVIDIA_MOUNTS} \
+    nosana-diagnostics:latest
+
+sleep 2
+
+if docker ps --format '{{.Names}}' | grep -q "^${DIAG_CONTAINER_NAME}$"; then
+    info "Container '${DIAG_CONTAINER_NAME}' is running."
+else
+    warn "Diagnostics sidecar failed to start (non-fatal). Check: docker logs ${DIAG_CONTAINER_NAME}"
 fi
 
 echo ""
@@ -261,5 +367,6 @@ echo ""
 echo "  To check status:  docker logs ${CONTAINER_NAME}"
 echo "  To stop + remove: docker stop ${CONTAINER_NAME}"
 echo "  To update/start:  re-run this install script"
+echo "  Diagnostics:      docker logs ${DIAG_CONTAINER_NAME}"
 echo "══════════════════════════════════════"
 echo ""
