@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 0.02.0
+# Version: 0.02.3
 # Nosana Telemetry — Diagnostics Sidecar
 # Runs inside Alpine container; watches container logs and executes playbooks on pattern matches.
 set -uo pipefail
@@ -16,6 +16,15 @@ DIAG_LOG_MAX_BYTES=1048576   # 1 MB
 
 NODE_NAME="${NODE_NAME:-$(hostname)}"
 GITHUB_RAW="${GITHUB_RAW:-}"
+OTEL_SERVER="${OTEL_SERVER:-}"
+OTEL_API_KEY="${OTEL_API_KEY:-}"
+
+VERSION_FILE="/etc/diagnostics/VERSION"
+UPDATE_COOLDOWN_FILE="/var/log/diagnostics/update-cooldown"
+UPDATE_CHECK_INTERVAL=30     # seconds between version checks
+UPDATE_COOLDOWN_SECS=600     # 10 minutes between update attempts
+UPDATE_INITIAL_DELAY=60      # seconds before first check
+UPDATE_JITTER_MAX=300        # random 0–300s spread for 1300-host fleet
 
 RATE_LIMIT_MAX=10            # max diagnostic runs per hour per host
 RATE_WINDOW=3600             # seconds (1 hour)
@@ -323,10 +332,137 @@ tail_loop() {
 }
 
 # ---------------------------------------------------------------------------
-# SECTION 13: Startup initialization
+# SECTION 13: Auto-update mechanism
+# ---------------------------------------------------------------------------
+get_local_version() {
+    if [[ -f "$VERSION_FILE" ]]; then
+        tr -d '[:space:]' < "$VERSION_FILE"
+    else
+        echo "unknown"
+    fi
+}
+
+check_for_update() {
+    [[ -z "$GITHUB_RAW" ]] && return 1
+
+    local remote_version
+    remote_version=$(wget -qO- "${GITHUB_RAW}/VERSION" 2>/dev/null | tr -d '[:space:]') || return 1
+
+    if [[ -z "$remote_version" ]]; then
+        log_warn "auto_update: empty remote VERSION"
+        return 1
+    fi
+
+    local local_version
+    local_version=$(get_local_version)
+
+    if [[ "$local_version" != "$remote_version" ]]; then
+        log_info "auto_update: version mismatch local=${local_version} remote=${remote_version}"
+        return 0  # update available
+    fi
+    return 1  # up to date
+}
+
+spawn_updater() {
+    # Lock: skip if updater already running
+    if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q '^nosana-updater$'; then
+        log_warn "auto_update: nosana-updater container already exists — skipping"
+        return 1
+    fi
+
+    # Cooldown: check persistent cooldown file on diag-logs volume
+    local now
+    now=$(date +%s)
+    if [[ -f "$UPDATE_COOLDOWN_FILE" ]]; then
+        local last_attempt
+        last_attempt=$(cat "$UPDATE_COOLDOWN_FILE" 2>/dev/null || echo 0)
+        local elapsed=$(( now - last_attempt ))
+        if (( elapsed < UPDATE_COOLDOWN_SECS )); then
+            log_info "auto_update: cooldown active (${elapsed}s < ${UPDATE_COOLDOWN_SECS}s) — skipping"
+            return 1
+        fi
+    fi
+
+    # Write cooldown stamp
+    printf '%s\n' "$now" > "$UPDATE_COOLDOWN_FILE"
+
+    # Validate required env vars
+    if [[ -z "$OTEL_SERVER" || -z "$OTEL_API_KEY" ]]; then
+        log_warn "auto_update: OTEL_SERVER or OTEL_API_KEY not set — cannot spawn updater"
+        return 1
+    fi
+
+    local local_version
+    local_version=$(get_local_version)
+
+    log_diag "DIAG auto_update TRIGGERED host=${NODE_NAME} local_version=${local_version}"
+
+    log_diag "DIAG auto_update STARTED host=${NODE_NAME}"
+
+    docker run -d --rm \
+        --name nosana-updater \
+        --network host \
+        --pid host \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /opt/nosana-telemetry:/opt/nosana-telemetry \
+        -v /var/lib/docker:/var/lib/docker:ro \
+        -v /etc/hostname:/etc/hostname:ro \
+        -v /proc:/hostfs/proc:ro \
+        -v /sys:/hostfs/sys:ro \
+        alpine:3.21 \
+        sh -c "
+            apk add --no-cache bash wget curl docker-cli >/dev/null 2>&1
+            wget -qO /tmp/install.sh '${GITHUB_RAW}/install.sh'
+            for attempt in 1 2 3; do
+                bash /tmp/install.sh '${OTEL_SERVER}' '${OTEL_API_KEY}' && exit 0
+                sleep 10
+            done
+            exit 1
+        " 2>/dev/null
+
+    local rc=$?
+    if (( rc == 0 )); then
+        log_diag "DIAG auto_update END host=${NODE_NAME} status=updater_spawned"
+    else
+        log_warn "auto_update: docker run failed (rc=${rc})"
+    fi
+    return $rc
+}
+
+update_check_loop() {
+    [[ -z "$GITHUB_RAW" ]] && { log_info "GITHUB_RAW not set — auto-update disabled"; return; }
+    [[ -z "$OTEL_SERVER" || -z "$OTEL_API_KEY" ]] && { log_info "OTEL_SERVER/OTEL_API_KEY not set — auto-update disabled"; return; }
+
+    # Initial delay + jitter to spread fleet-wide checks
+    local jitter=0
+    if command -v shuf &>/dev/null; then
+        jitter=$(shuf -i 0-${UPDATE_JITTER_MAX} -n 1)
+    else
+        jitter=$(( RANDOM % UPDATE_JITTER_MAX ))
+    fi
+    local total_delay=$(( UPDATE_INITIAL_DELAY + jitter ))
+    log_info "auto_update: first check in ${total_delay}s (base=${UPDATE_INITIAL_DELAY}s + jitter=${jitter}s)"
+    sleep "$total_delay"
+
+    while true; do
+        if check_for_update; then
+            if spawn_updater; then
+                # Updater spawned — install.sh will kill this sidecar, so just exit the loop
+                log_info "auto_update: updater spawned — exiting check loop (sidecar will be replaced)"
+                return
+            fi
+        fi
+        sleep "$UPDATE_CHECK_INTERVAL"
+    done
+}
+
+# ---------------------------------------------------------------------------
+# SECTION 14: Startup initialization
 # ---------------------------------------------------------------------------
 main() {
-    log_info "Nosana Diagnostics Sidecar starting (version 0.02.0) node=${NODE_NAME}"
+    local sidecar_version
+    sidecar_version=$(get_local_version)
+    log_info "Nosana Diagnostics Sidecar starting (version ${sidecar_version}) node=${NODE_NAME}"
 
     # Create required directories and log file
     mkdir -p "$(dirname "$DIAG_LOG")" "$COOLDOWN_DIR"
@@ -342,6 +478,11 @@ main() {
     REFRESH_PID=$!
     log_info "Playbook refresh loop started (pid=$REFRESH_PID, interval=${PLAYBOOK_REFRESH_INTERVAL}s)"
 
+    # Start background auto-update check loop
+    update_check_loop &
+    UPDATE_PID=$!
+    log_info "Auto-update check loop started (pid=$UPDATE_PID, interval=${UPDATE_CHECK_INTERVAL}s)"
+
     # Wait until container log files exist before starting tail
     wait_for_logs
 
@@ -349,8 +490,9 @@ main() {
     tail_loop
 
     # Cleanup (reached only on SIGTERM/container stop)
-    log_info "Diagnostics sidecar exiting — stopping refresh loop (pid=$REFRESH_PID)"
+    log_info "Diagnostics sidecar exiting — stopping background loops"
     kill "$REFRESH_PID" 2>/dev/null || true
+    kill "$UPDATE_PID" 2>/dev/null || true
 }
 
 main "$@"
