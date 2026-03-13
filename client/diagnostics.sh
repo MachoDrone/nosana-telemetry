@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 0.02.7
+# Version: 0.02.8
 # Nosana Telemetry — Diagnostics Sidecar
 # Runs inside Alpine container; watches container logs and executes playbooks on pattern matches.
 set -uo pipefail
@@ -411,7 +411,7 @@ spawn_updater() {
         -v /sys:/hostfs/sys:ro \
         alpine:3.21 \
         sh -c "
-            apk add --no-cache bash wget curl docker-cli >/dev/null 2>&1
+            apk add --no-cache bash wget curl docker-cli python3 >/dev/null 2>&1
             wget -qO /tmp/install.sh '${GITHUB_RAW}/install.sh'
             for attempt in 1 2 3; do
                 bash /tmp/install.sh '${OTEL_SERVER}' '${OTEL_API_KEY}' && exit 0
