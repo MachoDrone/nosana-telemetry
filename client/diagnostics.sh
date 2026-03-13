@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 0.03.0
+# Version: 0.03.1
 # Nosana Telemetry — Diagnostics Sidecar
 # Runs inside Alpine container; watches container logs and executes playbooks on pattern matches.
 set -uo pipefail
@@ -29,6 +29,11 @@ UPDATE_JITTER_MAX=300        # random 0–300s spread for 1300-host fleet
 RATE_LIMIT_MAX=10            # max diagnostic runs per hour per host
 RATE_WINDOW=3600             # seconds (1 hour)
 PLAYBOOK_REFRESH_INTERVAL=3600  # 60 minutes
+
+# Catch-all generic error pattern (case-insensitive)
+GENERIC_ERROR_PATTERN='(error|fatal|panic|exception|\bfail\b|✖|========== ERROR)'
+UNKNOWN_DEDUP_SECS=60        # suppress duplicate unknown triggers for 60s
+declare -A UNKNOWN_SEEN=()   # key: trigger hash, value: unix timestamp
 
 # Globals populated by load_playbooks
 declare -a PB_IDS=()
@@ -224,7 +229,7 @@ execute_playbook() {
     # Truncate trigger line to 120 chars
     local short_trigger="${trigger_line:0:120}"
 
-    log_diag "DIAG ${pb_id} TRIGGERED host=${NODE_NAME} trigger=\"${short_trigger}\""
+    log_diag "DIAG ${pb_id} TRIGGERED host=${NODE_NAME} error_class=known trigger=\"${short_trigger}\""
     maybe_rotate_log
 
     local cmd_count="${PB_CMD_COUNT[$pb_id]:-0}"
@@ -274,12 +279,14 @@ strip_cri_prefix() {
 # ---------------------------------------------------------------------------
 match_and_dispatch() {
     local log_line="$1"
+    local matched_known=false
 
     for pb_id in "${PB_IDS[@]}"; do
         local pattern="${PB_PATTERN[$pb_id]:-}"
         [[ -z "$pattern" ]] && continue
 
         if printf '%s' "$log_line" | grep -qEi "$pattern" 2>/dev/null; then
+            matched_known=true
             local cooldown="${PB_COOLDOWN[$pb_id]:-300}"
 
             if ! cooldown_check "$pb_id" "$cooldown"; then
@@ -295,6 +302,24 @@ match_and_dispatch() {
             execute_playbook "$pb_id" "$log_line"
         fi
     done
+
+    # Catch-all: flag unrecognized error-like lines
+    if ! $matched_known; then
+        if printf '%s' "$log_line" | grep -qEi "$GENERIC_ERROR_PATTERN" 2>/dev/null; then
+            local short_trigger="${log_line:0:120}"
+            # Simple dedup: hash the trigger, skip if seen within UNKNOWN_DEDUP_SECS
+            local trigger_hash
+            trigger_hash=$(printf '%s' "$short_trigger" | md5sum | awk '{print $1}')
+            local now
+            now=$(date +%s)
+            local last_seen="${UNKNOWN_SEEN[$trigger_hash]:-0}"
+            if (( now - last_seen >= UNKNOWN_DEDUP_SECS )); then
+                UNKNOWN_SEEN["$trigger_hash"]="$now"
+                log_diag "DIAG unknown_error DETECTED host=${NODE_NAME} error_class=unknown trigger=\"${short_trigger}\""
+                maybe_rotate_log
+            fi
+        fi
+    fi
 }
 
 # ---------------------------------------------------------------------------

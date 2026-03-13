@@ -102,6 +102,13 @@ processors:
         statements:
           - set(attributes["container.id"], ExtractPatterns(attributes["log.file.path"], ".*/(?P<id>[a-f0-9]{12})[a-f0-9]*/userdata/ctr\\.log")["id"]) where attributes["log.file.path"] != nil
 
+  transform/error_class:
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["error_class"], "known") where IsMatch(body, "error_class=known")
+          - set(attributes["error_class"], "unknown") where IsMatch(body, "error_class=unknown")
+
   batch:
     timeout: 10s
     send_batch_size: 1000
@@ -130,7 +137,7 @@ service:
       exporters: [otlphttp]
     logs/diagnostics:
       receivers: [filelog/diagnostics]
-      processors: [resource/host_info_diag, batch]
+      processors: [resource/host_info_diag, transform/error_class, batch]
       exporters: [otlphttp]
   telemetry:
     logs:
