@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.02.7
+# Version: 0.02.8
 # Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
 set -euo pipefail
 
