@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Nosana Telemetry Client — Installation Script
-# Version: 0.03.0
-# Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key>
+# Version: 0.03.2
+# Usage: bash <(wget -qO- https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client/install.sh) <server_address> <api_key> [branch]
 set -euo pipefail
 
 INSTALL_DIR="/opt/nosana-telemetry"
-GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/main/client"
+BRANCH="${3:-main}"
+GITHUB_RAW="https://raw.githubusercontent.com/MachoDrone/nosana-telemetry/${BRANCH}/client"
 CONTAINER_NAME="nosana-telemetry-client"
 DIAG_CONTAINER_NAME="nosana-diagnostics"
 
@@ -35,8 +36,9 @@ echo ""
 if [[ $# -lt 2 ]]; then
     err "Missing required arguments."
     echo "" >&2
-    echo "Usage: install.sh <server_address> <api_key>" >&2
+    echo "Usage: install.sh <server_address> <api_key> [branch]" >&2
     echo "Example: install.sh 154.54.100.193 abc123def456..." >&2
+    echo "  Branch defaults to 'main'. Pass a branch name to test a PR." >&2
     exit 1
 fi
 
@@ -45,6 +47,9 @@ API_KEY="$2"
 
 info "Server address: ${SERVER_ADDRESS}"
 info "API key:        ${API_KEY:0:8}..."
+if [[ "$BRANCH" != "main" ]]; then
+    info "Branch:         ${BRANCH} (testing)"
+fi
 echo ""
 
 # ─── 3. Check prerequisites ───────────────────────────────────────────────────
