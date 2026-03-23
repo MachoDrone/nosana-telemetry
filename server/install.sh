@@ -110,6 +110,7 @@ download "prometheus.yml"
 download "grafana/provisioning/datasources/datasources.yaml"
 download "grafana/provisioning/dashboards/dashboards.yaml"
 download "grafana/provisioning/dashboards/nosana-overview.json"
+download "grafana/provisioning/dashboards/error-triage.json"
 
 info "All configuration files downloaded."
 
